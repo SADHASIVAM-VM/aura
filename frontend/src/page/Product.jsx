@@ -23,7 +23,7 @@ const Product = () => {
   console.log(product)
 
   return (
-    <div className="bg-[#f9f9f9] text-black py-10 px-6 lg:px-20 mt-20">
+    <div className=" text-black py-10 px-6 lg:px-20 mt-14">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
         {/* Left Side - Product Images */}
         <div className="flex flex-col gap-4items-center">

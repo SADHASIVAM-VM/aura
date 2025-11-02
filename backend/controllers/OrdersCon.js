@@ -25,7 +25,7 @@ const total = cart_items.reduce((sum, item) => {
 console.log('===2===',total)
   
     // 3. Create order
-    const { data: order, error: orderError } = await supabase
+    const { data:order, error:orderError } = await supabase
       .from('orders')
       .insert({ user_id: user_id, total_amount:total, status: 'pending' })
       .select('*')
@@ -44,7 +44,7 @@ console.log('===2===',total)
     console.log(orderItemsData)
 
     //inser into order items
-    const { data: order_item, error: orders_itemsError } = await supabase
+    const { data:order_item, error: orders_itemsError } = await supabase
   .from('order_items')
   .insert(orderItemsData);
 

@@ -1,98 +1,102 @@
-import { CurrencyRupeeIcon, TagIcon } from '@heroicons/react/16/solid'
-import { TooltipProvider } from './ui/tooltip'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@radix-ui/react-tooltip'
-import { HeartIcon } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
+import { HeartIcon, ScanHeartIcon, ShoppingBasket, StarIcon, TagIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Carded = (item) => {
-    const baseUrl = import.meta.env.VITE_BASE_URL
-  const navigate = useNavigate()
+  const baseUrl = import.meta.env.VITE_BASE_URL;
+  const navigate = useNavigate();
+  const userIdd = localStorage.getItem("user_id");
 
   const navi = () => {
-    navigate("/product/" + item.id)
-    document.location.reload()
-    document.addEventListener('scroll', scroll(0, 0))
-  }
-// add to wishlist
-const userIdd = localStorage.getItem('user_id')
-const addTowish = async (item)=>{
-  const formdata={}
-  formdata.product_id = item.id
-  formdata.user_id = userIdd
+    navigate("/product/" + item.id);
+    document.location.reload();
+  };
 
-  fetch(baseUrl+'/wishlist', {
-  method:'POST',
-  headers:{
-    'Content-Type':'application/json'
-  },
-  body:JSON.stringify(formdata)
-}).then((res)=> res.json())
-.then(re=> toast.success('added to wishlist'))
-.catch(err=> toast.error('error ?'))
-}
-
+  const addToWish = async () => {
+    const formdata = { product_id: item.id, user_id: userIdd };
+    fetch(`${baseUrl}/wishlist`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formdata),
+    })
+      .then((res) => res.json())
+      .then(() => toast.success("Added to wishlist"))
+      .catch(() => toast.error("Error adding to wishlist"));
+  };
 
   return (
     <div
-     
-      className="w-full max-w-sm text-white rounded-xl border  hover:shadow-sm transition duration-300 cursor-pointer relative group"
+      onClick={navi}
+      className="relative hover:rounded-2xl  transition-all duration-300 cursor-pointer overflow-hidden"
     >
-      {/* Wishlist / Cart Buttons */}
-      <div className="absolute top-5 right-5 flex gap-2 z-10">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="bg-[#f4f4f3] p-1 rounded-full shadow hover:shadow-md">
-                <HeartIcon className="h-6 w-6 hover:fill-red-500 text-red-400 " onClick={()=>addTowish(item)} />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent><p className='bg-black text-xs p-2' >Wishlist</p></TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      
+      {/* Wishlist Icon */}
+      <div
+        className="absolute top-4 right-4 bg-white p-2 rounded-full shadow hover:bg-red-100 z-10"
+        onClick={(e) => {
+          e.stopPropagation();
+          addToWish();
+        }}
+      >
+        <ScanHeartIcon className="h-5 w-5 text-[#6047f5]" />
       </div>
 
       {/* Image */}
-      <div className="p-4 "  onClick={navi}>
-
+      <div className="w-full h-48 bg-radial rounded-2xl from-[#e7e7e7] via-[#e6e7e7] to-[#d9d9d7]   flex items-center justify-center overflow-hidden">
         <img
           src={item.image_url}
           alt={item.name}
-          loading='lazy'
-            onError={(e) => {
-    e.target.onerror = null // Prevents infinite loop if placeholder also fails
-    e.target.src = 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-collection-5_large.png?v=1530129199' // Replace with your placeholder path
-  }}
-          className="w-full h-56 object-contain bg-white rounded-2xl transition-transform duration-200 group-hover:scale-105"
+          loading="lazy"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src =
+              "https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-collection-5_large.png?v=1530129199";
+          }}
+          className="w-40 h-40 object-contain transition-transform duration-300 group-hover:scale-105"
         />
       </div>
 
       {/* Details */}
-      <div className="px-5 pb-5 space-y-2">
-        <h5 className="text-lg text-black font-semibold truncate">{item.name.length >15 ? item.name.slice(0,30)+'....': item.name
-                }</h5>
+      <div className="p-2 rounded-2xl bg-white group hover:bg-[#6047f5] hover:text-white mt-2 space-y-2">
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-green-500 flex items-center gap-1">
-              <CurrencyRupeeIcon className="w-5 h-5" />
-              {Math.round(item.price)}
+        <div className="flex flex-col gap-5 justify-center items-center">
+           <h3 className=" font-extrabold text-xl">
+          {item.name}
+        </h3>
+
+{/* price */}
+        <div className=" group group-hover:border-white border-blue-600 border px-3 py-1 rounded-2xl">
+
+          <p className="text-[#6047f5] group-hover:text-white flex items-center gap-2">
+            <ShoppingBasket className="text-[#6047f5] size-4 group-hover:text-white"/>
+            $ {item.price}</p>
+        </div>
+        </div>
+       
+
+        {/* <div className="flex justify-between items-center">
+          <div className="flex flex-col">
+            <span className="text-gray-900 font-bold text-lg">
+              ${Math.round(item.price)}
             </span>
-            <span className="text-sm text-red-400 line-through">
-              ₹{Math.round(item.price * 1.2)}
+            <span className="text-gray-400 line-through text-xs">
+              ${Math.round(item.price * 1.2)}
             </span>
           </div>
-          <span className="text-xs text-black/70">★ 4.5 ({Math.round(Math.random()*100)+'k+'})</span>
+
+          <div className="flex items-center gap-1 text-yellow-400 text-sm">
+            <StarIcon className="w-4 h-4 fill-yellow-400" />
+            <span className="text-gray-600">4.{Math.floor(Math.random() * 5)}</span>
+          </div>
+        </div> */}
+
+        <div className="flex items-center text-xs text-gray-500 gap-1">
+          <TagIcon className="w-3 h-3 text-orange-400" />
+          <span>{item.category || "General"}</span>
         </div>
 
-        <div className="flex items-center text-xs text-black/70 gap-1">
-          <TagIcon className="w-4 h-4 text-orange-400" />
-          <span>{item.category}</span>
-        </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Carded
+export default Carded;

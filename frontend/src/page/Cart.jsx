@@ -36,7 +36,7 @@ const uuiid = localStorage.getItem('user_id')
  const removeItem = async (id) => {
   try {
      setCart((prev) => prev.filter((item) => item.id !== id))
-    const response = await fetch(`h${baseUrl}/cart?user_id=${uuiid}&id=${id}`, {
+    const response = await fetch(`${baseUrl}/cart?user_id=${uuiid}&id=${id}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
     });
@@ -108,8 +108,8 @@ const uuiid = localStorage.getItem('user_id')
           </div>
         ))
       : <div className="flex flex-col items-center justify-center gap-5">
-        <img className="w-52 h-52" src={emptyCart} alt="" />
-        <p className="text-xs bg-red-400 p-2 rounded-xl text-white ">Your Cart is Empty ☹️</p>
+        <img className="w-64 h-64" src={"https://cdn-icons-png.flaticon.com/512/11329/11329060.png"} alt="" />
+        {/* <p className="text-xs bg-red-400 p-2 rounded-xl text-white ">Your Cart is Empty ☹️</p> */}
       </div>
       }
        

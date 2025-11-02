@@ -2,8 +2,10 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const supabase = require('../util/Sb');
 const dotenv = require('dotenv');
-dotenv.config({path:path.join(__dirname,'/config','.env')})
-const secret = process.env.JWT_SCRET_KEY
+dotenv.config({path:path.join(__dirname,"../config/.env'")})
+const screct = process.env.JWT_SCRECT_KEY
+
+console.log(screct)
 
 // login
 const Login = async (req, res) => {
@@ -21,7 +23,7 @@ const Login = async (req, res) => {
       }
   
       // Return token or store in HTTP-only cookie
-      const twk = jwt.sign(data,secret,{expiresIn:'7d'})
+      const twk = jwt.sign(data,screct,{expiresIn:'7d'})
 
       res.status(200).json({
         message: 'Login successful',
@@ -29,7 +31,7 @@ const Login = async (req, res) => {
         token: twk, // important!
       });
     } catch (err) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json(err);
     }
   };
 

@@ -1,186 +1,173 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
+import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import Carded from "../components/Carded";
+import { useDebounce } from "../config/useDebouncing";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-import { Skeleton } from "@/components/ui/skeleton"
- 
-import { Checkbox } from "@/components/ui/checkbox"
-import { Slider } from "@/components/ui/slider"
-import { Button } from "@/components/ui/button"
-import Carded from "../components/Carded"
-import { useDebounce } from "../config/useDebouncing"
+const brands = ["Adidas", "Columbia", "Demix", "New Balance", "Nike", "Xiaomi", "Asics"];
+const categories = ["All Categories", "Deals", "Crypto", "Fashion", "Health & Wellness", "Art"];
+const baseUrl = import.meta.env.VITE_BASE_URL;
 
-const brands = ["Nike", "Adidas", "Puma", "Reebok"]
-const categories = ["Shoes", "T-Shirts", "Jeans", "Accessories"]
-const ratings = ["4★ & above", "3★ & above", "2★ & above"]
- const baseUrl = import.meta.env.VITE_BASE_URL
-export default function FilterSidebar() {
-  const [price, setPrice] = useState([500])
-  const [selectedBrands, setSelectedBrands] = useState([])
-  const [selectedCategories, setSelectedCategories] = useState([])
-  const [selectedRatings, setSelectedRatings] = useState([])
-  const [AllItem, setAllItem] = useState()
-  const [query, setQuery] = useState('')
-   const debouncedQuery = useDebounce(query, 1000); // 500ms delay
+export default function ModernFilterPage() {
+  const [price, setPrice] = useState([300]);
+  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [AllItem, setAllItem] = useState();
+  const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 800);
+  const token = localStorage.getItem("token");
 
-  const handleToggle = (item, selectedItems, setSelectedItems) => {
-    setSelectedItems((prev) =>
-      prev.includes(item) ? prev.filter((v) => v !== item) : [...prev, item]
-    )
-  }
-const token = localStorage.getItem('token')
-  const handleClearAll = () => {
-    setSelectedBrands([])
-    setSelectedCategories([])
-    setSelectedRatings([])
-    setPrice([500])
-  }
-  useEffect(()=>{
-    const fetching = ()=>{
+  const handleToggleBrand = (brand) => {
+    setSelectedBrands((prev) =>
+      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
+    );
+  };
+
+
+
+  const handleClear = () => {
+    setSelectedBrands([]);
+    setPrice([300]);
+    setQuery("");
+  };
+
+  useEffect(() => {
+    const fetchItems = async () => {
       const endpoint = query
         ? `${baseUrl}/search?search=${query}`
         : `${baseUrl}/products`;
 
-      try{
-        fetch(endpoint,{
-          headers:{
-            Authorization: `Bearer ${token}`
-          }
-        })
-      .then(res=>res.json())
-      .then(json=>setAllItem(json))
-      .catch(()=>setError(true))
-  
+      try {
+        const res = await fetch(endpoint, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json();
+        setAllItem(json);
+      } catch (err) {
+        console.log(err);
       }
-      catch(err){
-        console.log(err)
-      }
-    }
-    fetching()
-    },[debouncedQuery])
+    };
+    fetchItems();
+  }, [debouncedQuery]);
 
   return (
-    <div className="flex my-14 flex-col lg:flex-row gap-5">
- <aside className="z-20 lg:w-1/5 w-full max-h-screen sticky top-0  text-black bg-white border-b-2 rounded-md px-4 space-y-6">
-    
-      <Accordion type="multiple"   className="w-full space-y-2">
-       <AccordionItem value="filter">
-        <AccordionTrigger className="text-lg font-semibold mb-2">Filter</AccordionTrigger>
-        <AccordionContent className="space-y-3 text-white bg-black  rounded-xl p-5">
-        <div className=" ">
-        <label className="my-2">Search</label>
-        <input type="search" onChange={(e)=> setQuery(e.target.value)}  className="p-2 w-full border border-white/50 rounded-xl"/>
-      </div>
-             {/* Category */}
-        <h1 className=" text-btn ">Category</h1>
-            {categories.map((item) => (
-              <div key={item} className="flex items-center gap-2 mb-2">
-                <Checkbox
-                  id={`category-${item}`}
-                  checked={selectedCategories.includes(item)}
-                  onCheckedChange={() =>
-                    handleToggle(item, selectedCategories, setSelectedCategories)
-                  }
-                />
-                <label htmlFor={`category-${item}`} className="text-sm">
-                  {item}
-                </label>
-              </div>
+    <div className="min-h-screen w-full bg-[#eff1f5] p-8 mt-14">
+        {/* Category Tabs */}
+          <div className="flex flex-wrap gap-3 mb-6">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                className={`px-4 py-2 rounded-full text-sm  ${
+                  cat === ""
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                {cat}
+              </button>
             ))}
-
-        {/* Brand */}
-       
-          <h1 className=" text-btn ">Brand</h1>
-   
-            {brands.map((brand) => (
-              <div key={brand} className="flex items-center gap-2 mb-2">
-                <Checkbox
-                  id={`brand-${brand}`}
-                  checked={selectedBrands.includes(brand)}
-                  onCheckedChange={() =>
-                    handleToggle(brand, selectedBrands, setSelectedBrands)
-                  }
-                />
-                <label htmlFor={`brand-${brand}`} className="text-sm">
-                  {brand}
-                </label>
-              </div>
-            ))}
+          </div>
     
-
-        {/* Price */}
-      
-          <h1 className=" text-btn ">Price</h1>
-            <label className="block mb-1 text-sm">Up to ₹{price[0]}</label>
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Sidebar */}
+        <aside className=" flex flex-col lg:w-1/4 space-y-4">
+          {/* Price Range */}
+          <div className="bg-white  p-6 w-full rounded-xl">
+            <h2 className="text-gray-800 font-semibold mb-3">Price Range</h2>
+            <p className="text-sm text-gray-500 mb-2">
+              The average price is ${price[0]}
+            </p>
             <Slider
               value={price}
               onValueChange={setPrice}
-              min={0}
-              max={5000}
-              step={100}
+              min={20}
+              max={1130}
+              step={10}
             />
-     
+            <div className="flex justify-between text-sm mt-2 text-gray-500">
+              <span>${20}</span>
+              <span>${1130}</span>
+            </div>
+          </div>
 
-        {/* Ratings */}
-        
-          <h1 className=" text-btn ">Customer Ratings</h1>
-            {ratings.map((rate) => (
-              <div key={rate} className="flex items-center gap-2 mb-2">
-                <Checkbox
-                  id={`rating-${rate}`}
-                  checked={selectedRatings.includes(rate)}
-                  onCheckedChange={() =>
-                    handleToggle(rate, selectedRatings, setSelectedRatings)
-                  }
-                />
-                <label htmlFor={`rating-${rate}`} className="text-sm">
-                  {rate}
-                </label>
-              </div>
-            ))}
-        
+          {/* Star Rating */}
+          <div className="bg-white  p-6 w-full rounded-xl">
+            <h2 className="text-gray-800 font-semibold mb-3">Star Rating</h2>
+            <div className="flex items-center gap-2 text-yellow-400 text-lg">
+              ★★★★☆ <span className="text-gray-500 text-sm">4 Stars & up</span>
+            </div>
+          </div>
 
-      {/* Buttons */}
-      <div className="flex gap-2 pt-2">
-        <Button variant="outline" onClick={handleClearAll} className="flex-1 text-black">
-          Clear All
-        </Button>
-        <Button className="flex-1 bg-btn">Apply</Button>
-      </div>
-      </AccordionContent>
-       </AccordionItem>
-          
-      </Accordion>
-    </aside>
-
-    <div className=" lg:w-4/5 w-full">
-            <h1 className="text-black p-5 text-xl font-bold">Total Itmes : {AllItem&&AllItem.data.length}</h1>
-        <div className="flex justify-center  ">
-            {
-              AllItem&&AllItem ?
-                ( <div className="grid  grid-cols-2 md:grid-cols-3  place-content-center place-items-center gap-5 xl:grid-cols-4">
-                    {
-                     AllItem&&AllItem?.data?.length > 0 ? AllItem?.data.map((e)=> <Carded {...e}/>):
-                     (
-                      <p className="text-2xl sub_head text-black/50 w-full text-center flex justify-center min-h-96">No... Search Result : <span className="text-black ml-2"> '{ query}'</span></p>
-                     )
-                    }
+          {/* Brand Filter */}
+          <div className="bg-white  p-6 w-full rounded-xl">
+            <h2 className="text-gray-800 font-semibold mb-3">Brand</h2>
+            <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
+              {brands.map((brand) => (
+                <div key={brand} className="flex items-center gap-2">
+                  <Checkbox
+                    checked={selectedBrands.includes(brand)}
+                    onCheckedChange={() => handleToggleBrand(brand)}
+                    id={brand}
+                  />
+                  <label htmlFor={brand} className="text-gray-700">
+                    {brand}
+                  </label>
                 </div>
-                )
-               : (<div className="w-full h-[600px] flex-1 flex items-center place-content-center text-white justify-center">
-               <div className="loader">
-   
-               </div>
-    </div>)}
-        </div>
+              ))}
+            </div>
+          </div>
 
-     
+          {/* Delivery Options */}
+          <div className="bg-white  p-6 w-full rounded-xl">
+            <h2 className="text-gray-800 font-semibold mb-3">
+              Delivery Options
+            </h2>
+            <div className="flex gap-3">
+              <Button variant="outline" className="border-gray-300 text-gray-700">
+                Standard
+              </Button>
+              <Button className="bg-blue-600 text-white hover:bg-blue-700">
+                Pick Up
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button onClick={handleClear} variant="outline" className="flex-1 border-gray-300">
+              Reset
+            </Button>
+            <Button className="flex-1 bg-blue-600 text-white hover:bg-blue-700">
+              Apply
+            </Button>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="w-full lg:w-3/4">
+        
+
+          {/* Product Grid */}
+        
+
+          {AllItem? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {AllItem&&AllItem ?.data?.length > 0 ? (
+                AllItem.data.map((item) => <Carded key={item.id} {...item} />)
+              ) : (
+                <p className="text-black text-center col-span-full">
+                  No results found for "{query}"
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="flex justify-center items-center h-96 text-black">
+              Loading...
+            </div>
+          )}
+        </main>
+      </div>
+
+
     </div>
-    </div>
-   
-  )
+  );
 }
